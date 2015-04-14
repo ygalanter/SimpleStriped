@@ -9,10 +9,14 @@
     "resources": {
         "media": [
             {
-                "file": "images/menu.png",
-                "menuIcon": true,
-                "name": "MENU",
-                "type": "png"
+                "file": "fonts/Molot.otf",
+                "name": "MOLOT_46",
+                "type": "font"
+            },
+            {
+                "file": "fonts/Molot.otf",
+                "name": "MOLOT_52",
+                "type": "font"
             },
             {
                 "file": "images/mask_bg.png",
@@ -20,9 +24,10 @@
                 "type": "png"
             },
             {
-                "file": "fonts/Molot.otf",
-                "name": "MOLOT_50",
-                "type": "font"
+                "file": "images/menu.png",
+                "menuIcon": true,
+                "name": "MENU",
+                "type": "png"
             }
         ]
     },
@@ -34,7 +39,7 @@
     ],
     "uuid": "70b3c606-e781-417f-bc89-6a32c4120f94",
     "versionCode": 1,
-    "versionLabel": "1.0",
+    "versionLabel": "1.1",
     "watchapp": {
         "watchface": true
     }
