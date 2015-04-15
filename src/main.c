@@ -60,9 +60,9 @@ void handle_init(void) {
   #endif  
   window_stack_push(my_window, true);
   
-  text_date = create_datetime_layer(GRect(0,-6,144,52), RESOURCE_ID_MOLOT_46);
+  text_date = create_datetime_layer(GRect(0,6,144,52), RESOURCE_ID_MOLOT_46);
   text_time = create_datetime_layer(GRect(0,52,144,52), RESOURCE_ID_MOLOT_52);
-  text_dow = create_datetime_layer(GRect(0,112,144,52), RESOURCE_ID_MOLOT_52);
+  text_dow = create_datetime_layer(GRect(0,106,144,52), RESOURCE_ID_MOLOT_46);
     
   // ** { begin setup mask for MASK effect
   mask.text = NULL;
