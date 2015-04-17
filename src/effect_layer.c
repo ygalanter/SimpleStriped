@@ -5,7 +5,7 @@
 // on layer update - apply effect
 static void effect_layer_update_proc(Layer *me, GContext* ctx) {
  
-  // retreiving layer and its coordinates
+  // retrieving layer and its coordinates
   EffectLayer* effect_layer = (EffectLayer*)(layer_get_data(me));
   GRect layer_frame = layer_get_frame(me);  
   
@@ -22,7 +22,7 @@ EffectLayer* effect_layer_create(GRect frame) {
   Layer* layer =layer_create_with_data(frame, sizeof(EffectLayer));
   layer_set_update_proc(layer, effect_layer_update_proc);
   EffectLayer* effect_layer = (EffectLayer*)layer_get_data(layer);
-  memset(effect_layer,0,sizeof(effect_layer));
+  memset(effect_layer,0,sizeof(EffectLayer));
   effect_layer->layer = layer;
 
   return effect_layer;                    
