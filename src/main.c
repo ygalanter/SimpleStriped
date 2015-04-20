@@ -4,12 +4,36 @@
 Window *my_window;
 
 TextLayer *text_time, *text_date, *text_dow;
+BitmapLayer *battery_layer;
 EffectLayer* effect_layer;
 static EffectMask mask;
 
 char s_date[] = "HELLO"; //test
 char s_time[] = "HOWRE"; //test
 char s_dow[] = "YOU"; //test
+
+static void battery_handler(BatteryChargeState state) {
+   
+   #ifdef PBL_COLOR
+     switch (state.charge_percent) {
+       case 100: bitmap_layer_set_background_color(battery_layer, GColorBrightGreen); break;
+       case 90: bitmap_layer_set_background_color(battery_layer, GColorGreen); break;
+       case 80: bitmap_layer_set_background_color(battery_layer, GColorIslamicGreen); break;
+       case 70: bitmap_layer_set_background_color(battery_layer, GColorKellyGreen); break;
+       case 60: bitmap_layer_set_background_color(battery_layer, GColorBrass); break;
+       case 50: bitmap_layer_set_background_color(battery_layer, GColorLimerick); break;
+       case 40: bitmap_layer_set_background_color(battery_layer, GColorYellow); break;
+       case 30: bitmap_layer_set_background_color(battery_layer, GColorIcterine); break;
+       case 20: bitmap_layer_set_background_color(battery_layer, GColorRajah); break;
+       case 10: bitmap_layer_set_background_color(battery_layer, GColorRed); break;
+   }
+     
+   #endif
+  
+   APP_LOG(APP_LOG_LEVEL_DEBUG,"Percent = %d, X = %d, W = %d", state.charge_percent, 72 - 72*state.charge_percent/100, 144*state.charge_percent/100);  
+  
+   layer_set_frame(bitmap_layer_get_layer(battery_layer), GRect(72 - 72*state.charge_percent/100, 167,  144*state.charge_percent/100, 168));
+}
 
 
 TextLayer* create_datetime_layer(GRect coords, int font) {
@@ -63,6 +87,15 @@ void handle_init(void) {
   text_date = create_datetime_layer(GRect(0,6,144,52), RESOURCE_ID_MOLOT_46);
   text_time = create_datetime_layer(GRect(0,52,144,52), RESOURCE_ID_MOLOT_52);
   text_dow = create_datetime_layer(GRect(0,106,144,52), RESOURCE_ID_MOLOT_46);
+  
+  battery_layer = bitmap_layer_create(GRect(0,167,144,168));
+  #ifndef PBL_COLOR
+    bitmap_layer_set_background_color(battery_layer, GColorWhite);
+  #else 
+    bitmap_layer_set_background_color(battery_layer, GColorBrightGreen);
+  #endif  
+  layer_add_child(window_get_root_layer(my_window), bitmap_layer_get_layer(battery_layer));
+  
     
   // ** { begin setup mask for MASK effect
   mask.text = NULL;
@@ -86,6 +119,10 @@ void handle_init(void) {
   //Manually call the tick handler when the window is loading
   tick_handler(t, DAY_UNIT | MINUTE_UNIT);
   
+  //getting battery info
+  battery_state_service_subscribe(battery_handler);
+  battery_handler(battery_state_service_peek());
+  
     
 }
 
@@ -100,6 +137,7 @@ void handle_deinit(void) {
   
   window_destroy(my_window);
   tick_timer_service_unsubscribe();
+  battery_state_service_unsubscribe();
 }
 
 int main(void) {
