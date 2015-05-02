@@ -199,7 +199,7 @@ void effect_mask(GContext* ctx, GRect position, void* param) {
   EffectMask *mask = (EffectMask *)param;
 
   //drawing background - only if real color is passed
-  if (!GColorEq(mask->background_color, GColorClear)) {
+  if (!gcolor_equal(mask->background_color, GColorClear)) {
     graphics_context_set_fill_color(ctx, mask->background_color);
     graphics_fill_rect(ctx, GRect(0, 0, position.size.w, position.size.h), 0, GCornerNone); 
   }  
@@ -225,7 +225,7 @@ void effect_mask(GContext* ctx, GRect position, void* param) {
   for (int y = 0; y < position.size.h; y++)
      for (int x = 0; x < position.size.w; x++) {
        temp_pixel = (GColor)get_pixel(bitmap_data, bytes_per_row, y + position.origin.y, x + position.origin.x);
-       if (GColorEq(temp_pixel, mask->mask_color))
+       if (gcolor_equal(temp_pixel, mask->mask_color))
          set_pixel(bitmap_data, bytes_per_row, y + position.origin.y, x + position.origin.x, get_pixel(bg_bitmap_data, bg_bytes_per_row, y + position.origin.y, x + position.origin.x));
   }
   
