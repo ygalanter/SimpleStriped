@@ -1,7 +1,9 @@
 {
-    "appKeys": {},
+    "appKeys": {
+        "KEY_PATTERN": 0
+    },
     "capabilities": [
-        ""
+        "configurable"
     ],
     "companyName": "yuri@galanter.net",
     "longName": "Simple Striped",
@@ -9,8 +11,23 @@
     "resources": {
         "media": [
             {
-                "file": "images/mask_bg.png",
-                "name": "MASC_BG",
+                "file": "images/vertical_color.png",
+                "name": "VERTICAL_COLOR",
+                "type": "png"
+            },
+            {
+                "file": "images/horizontal_color.png",
+                "name": "HORIZONTAL_COLOR",
+                "type": "png"
+            },
+            {
+                "file": "images/vertical_bw.png",
+                "name": "VERTICAL_BW",
+                "type": "png"
+            },
+            {
+                "file": "images/horizontal_bw.png",
+                "name": "HORIZONTAL_BW",
                 "type": "png"
             },
             {
@@ -38,8 +55,7 @@
         "basalt"
     ],
     "uuid": "b919ea5c-e0a5-4aaf-8d35-4b3b3227b532",
-    "versionCode": 1,
-    "versionLabel": "1.6",
+    "versionLabel": "1.8",
     "watchapp": {
         "watchface": true
     }

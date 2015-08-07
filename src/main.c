@@ -1,4 +1,5 @@
 #include <pebble.h>
+#include "main.h"  
 #include "effect_layer.h"
 
 Window *my_window;
@@ -11,6 +12,49 @@ static EffectMask mask;
 char s_date[] = "HELLO"; //test
 char s_time[] = "HOWRE"; //test
 char s_dow[] = "YOU"; //test
+
+int current_pattern; // currently loaded pattern
+
+// changes pattern of background
+static void change_pattern(int pattern) {
+  
+  // destroying existing pattern
+  if (mask.bitmap_background != NULL) {
+    gbitmap_destroy(mask.bitmap_background);
+  }
+  
+  // and creating new one
+  mask.bitmap_background = gbitmap_create_with_resource(pattern_array[pattern]);
+  
+  //for b&w patterns do a b&w background
+  #ifdef PBL_COLOR
+    window_set_background_color(my_window, pattern < PATTERN_BW_TRESHOLD? GColorBlack : GColorOxfordBlue);
+  #else 
+    window_set_background_color(my_window, GColorBlack);
+  #endif  
+}
+
+
+// handle configuration change
+static void in_recv_handler(DictionaryIterator *iterator, void *context) {
+  Tuple *t = dict_read_first(iterator);
+
+  while (t)  {
+
+    switch(t->key)    {
+    
+      case KEY_PATTERN:
+           persist_write_int(KEY_PATTERN, t->value->uint8);
+           current_pattern = t->value->uint8;
+           change_pattern(current_pattern);
+           layer_mark_dirty(effect_layer_get_layer(effect_layer));
+           break;
+    }    
+    
+    t = dict_read_next(iterator);
+  }
+  
+}  
 
 static void battery_handler(BatteryChargeState state) {
    
@@ -102,7 +146,11 @@ void handle_init(void) {
   mask.bitmap_mask = NULL;
   mask.mask_color = GColorWhite;
   mask.background_color = GColorClear;
-  mask.bitmap_background = gbitmap_create_with_resource(RESOURCE_ID_MASC_BG);
+  
+  // reading and setting background pattern
+  current_pattern = persist_read_int(KEY_PATTERN)? persist_read_int(KEY_PATTERN) : 0;
+  change_pattern(current_pattern);
+  
   // ** end setup mask }
 
   //creating effect layer
@@ -123,6 +171,9 @@ void handle_init(void) {
   battery_state_service_subscribe(battery_handler);
   battery_handler(battery_state_service_peek());
   
+  // subscribing to JS messages
+  app_message_register_inbox_received(in_recv_handler);
+  app_message_open(app_message_inbox_size_maximum(), app_message_outbox_size_maximum());
     
 }
 
@@ -138,6 +189,8 @@ void handle_deinit(void) {
   window_destroy(my_window);
   tick_timer_service_unsubscribe();
   battery_state_service_unsubscribe();
+  
+  app_message_deregister_callbacks();
 }
 
 int main(void) {
