@@ -1,0 +1,159 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <title>Simple Striped config</title>
+    <script type="text/javascript" src="slate.min.js"></script>
+    <link type="text/css" rel="stylesheet" href="slate.min.css" />
+
+    <style type="text/css">
+        .item img {
+            vertical-align:bottom;
+            padding-right:5px;
+        }
+    </style>
+
+
+    <script type="text/javascript">
+
+        var settings;
+
+        // to get value of query string
+        function getURLVariable(name) {
+            name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
+            var regexS = "[\\?&]" + name + "=([^&#]*)",
+                regex = new RegExp(regexS),
+                results = regex.exec(window.location.href);
+            if (results == null) return "";
+            else return results[1];
+        }
+
+        $(document).ready(function () {
+
+            //hiding color choices for Aplite
+            if (getURLVariable('platform') != 'basalt') {
+                $('label.color').hide()
+            }
+
+            // loading settings
+            try {
+                settings = JSON.parse(localStorage.getItem("simple_striped_settings"));
+            }
+            catch(err) {
+               settings = null;
+            }
+
+            if (settings == null) {
+                settings = {
+                    pattern: 0
+                };
+            }
+
+            // setting radio' value
+            $("input[name=radio-pattern][value='" + settings.pattern + "']").attr('checked', 'checked');
+            
+
+            //assigning save button
+            $('#xbtnSave').click(function () {
+
+                localStorage.setItem("simple_striped_settings", JSON.stringify(settings));
+        
+                var location = (decodeURIComponent(getURLVariable('return_to')) || "pebblejs://close#") + encodeURIComponent(JSON.stringify(settings));
+                document.location = location;
+
+            })
+
+            //assigning cancel button
+            $('#xbtnCancel').click(function () {
+
+                var location = decodeURIComponent(getURLVariable('return_to')) || "pebblejs://close#";
+                document.location = location;
+
+            })
+
+            //assigning checkboxes
+            $("input[name=radio-pattern]").change(function () {
+                settings.pattern = parseInt(this.value);
+            });
+
+
+            
+        }
+     )
+        
+    </script>
+
+    
+
+
+</head>
+<body>
+
+    <div class="item-container">
+        <div class="item-container-header">Select background pattern</div>
+        <div class="item-container-content">
+            <label class="item">
+                <img src="horizontal_bw.png" />Horizontal Stripes
+                <input type="radio" class="item-radio" name="radio-pattern" value="0" checked>
+            </label>
+            <label class="item color">
+                <img src="horizontal_color.png" />Horizontal Color Stripes
+                <input type="radio" class="item-radio" name="radio-pattern" value="10">
+            </label>
+            <label class="item">
+                <img src="vertical_bw.png" />Vertical Stripes
+                <input type="radio" class="item-radio" name="radio-pattern" value="1">
+            </label>
+            <label class="item color">
+                <img src="vertical_color.png" />Vertical Color Stripes
+                <input type="radio" class="item-radio" name="radio-pattern" value="11">
+            </label>
+
+        </div>
+    </div>
+
+    <div class="item-container">
+        <div class="button-container">
+            <input type="button" class="item-button" value="SAVE" id="xbtnSave">
+        </div>
+    </div>
+
+    <div class="item-container">
+        <div class="button-container">
+            <input type="button" class="item-button" value="CANCEL" id="xbtnCancel">
+        </div>
+    </div>
+
+        <div class="item-container">
+            <div class="button-container">
+                <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
+                    <input type="hidden" name="cmd" value="_s-xclick">
+                    <input type="hidden" name="hosted_button_id" value="2J4R2PMZAAQWQ">
+                    <input type="submit" value="My Starbucks fund" class="item-button" name="submit" alt="PayPal - The safer, easier way to pay online!">
+                    <img alt="" border="0" src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif" width="1" height="1" style="position:absolute">
+                </form>
+            </div>
+        </div>
+
+    <div class="item-container">
+        <div class="item-container-content">
+            <div class="item" style="font-size:small; line-height:130%">
+                If you like this watchface and would like to see it further developed as well as other wonderful Pebble apps and faces created, please know - I run on coffee. It's an essential fuel for inspiration and creativity. So if you click the Fund button above (or the ad below) - I won't run out of fuel :) Thanks!
+            </div>
+        </div>
+
+        <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+        <!-- Pebble Config -->
+        <ins class="adsbygoogle"
+             style="display:block"
+             data-ad-client="ca-pub-8184318363505287"
+             data-ad-slot="7086382952"
+             data-ad-format="auto"></ins>
+        <script>
+            (adsbygoogle = window.adsbygoogle || []).push({});
+        </script>
+
+
+</body>
+</html>
