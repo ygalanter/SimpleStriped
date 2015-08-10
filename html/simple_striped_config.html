@@ -36,6 +36,18 @@
                 $('label.color').hide()
             }
 
+            // hiding new config items from old watchface versions
+            var default_version = 1.8;
+            var watchface_version = getURLVariable('version') || default_version;
+            var this_el, config_version;
+            $('label.item').each(function () {
+                this_el = $(this);
+                config_version = this_el.data('version') || default_version;
+                if (watchface_version < config_version) {
+                    this_el.hide();
+                }
+            })
+
             // loading settings
             try {
                 settings = JSON.parse(localStorage.getItem("simple_striped_settings"));
@@ -109,6 +121,24 @@
                 <img src="vertical_color.png" />Vertical Color Stripes
                 <input type="radio" class="item-radio" name="radio-pattern" value="11">
             </label>
+            <label class="item" data-version="1.81">
+                <img src="tv_noise_bw.png" />TV Noise
+                <input type="radio" class="item-radio" name="radio-pattern" value="2">
+            </label>
+            <label class="item color" data-version="1.81">
+                <img src="tv_noise_color.png" />TV Noise Color
+                <input type="radio" class="item-radio" name="radio-pattern" value="12">
+            </label>
+            <label class="item" data-version="1.81">
+                <img src="grid_bw.png" />Grid
+                <input type="radio" class="item-radio" name="radio-pattern" value="3">
+            </label>
+            <label class="item color" data-version="1.81">
+                <img src="sunset_color.png" />Sea Sunset
+                <input type="radio" class="item-radio" name="radio-pattern" value="13">
+            </label>
+
+
 
         </div>
     </div>
