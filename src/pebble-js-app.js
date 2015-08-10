@@ -1,3 +1,5 @@
+var version = 1.81;
+
 Pebble.addEventListener("ready",
   function(e) {
     // console.log("PebbleKit JS ready!");
@@ -24,7 +26,7 @@ Pebble.addEventListener("showConfiguration",
     }
    
     //Load the remote config page
-    Pebble.openURL("http://codecorner.galanter.net/pebble/simple_striped/simple_striped_config.html?platform=" + platform);
+    Pebble.openURL("http://codecorner.galanter.net/pebble/simple_striped/simple_striped_config.html?version=" + version + "&platform=" + platform);
     
   }
 );

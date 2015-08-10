@@ -8,9 +8,13 @@
 int pattern_array[20] = 
   { RESOURCE_ID_HORIZONTAL_BW,
     RESOURCE_ID_VERTICAL_BW,
-    0, 0, 0, 0, 0, 0, 0, 0, 
+    RESOURCE_ID_TV_NOISE_BW,
+    RESOURCE_ID_GRID_BW, 
+    0, 0, 0, 0, 0, 0, 
     RESOURCE_ID_HORIZONTAL_COLOR,
     RESOURCE_ID_VERTICAL_COLOR,
-    0, 0, 0, 0, 0, 0, 0, 0
+    RESOURCE_ID_TV_NOISE_COLOR,
+    RESOURCE_ID_SUNSET_COLOR, 
+    0, 0, 0, 0, 0, 0
   };
 

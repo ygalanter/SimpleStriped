@@ -149,12 +149,13 @@ void handle_init(void) {
   
   // reading and setting background pattern
   current_pattern = persist_read_int(KEY_PATTERN)? persist_read_int(KEY_PATTERN) : 0;
+  current_pattern = 3;
   change_pattern(current_pattern);
   
   // ** end setup mask }
 
   //creating effect layer
-  effect_layer = effect_layer_create(GRect(0,0,144,168));
+  effect_layer = effect_layer_create(GRect(0,0,144,167));
   effect_layer_add_effect(effect_layer, effect_mask, &mask);
   layer_add_child(window_get_root_layer(my_window), effect_layer_get_layer(effect_layer));
   

@@ -11,6 +11,26 @@
     "resources": {
         "media": [
             {
+                "file": "images/grid_bw.png",
+                "name": "GRID_BW",
+                "type": "png"
+            },
+            {
+                "file": "images/tv_noise_bw.png",
+                "name": "TV_NOISE_BW",
+                "type": "png"
+            },
+            {
+                "file": "images/tv_noise_color.png",
+                "name": "TV_NOISE_COLOR",
+                "type": "png"
+            },
+            {
+                "file": "images/sunset_color.png",
+                "name": "SUNSET_COLOR",
+                "type": "png"
+            },
+            {
                 "file": "images/vertical_color.png",
                 "name": "VERTICAL_COLOR",
                 "type": "png"
@@ -55,7 +75,7 @@
         "basalt"
     ],
     "uuid": "b919ea5c-e0a5-4aaf-8d35-4b3b3227b532",
-    "versionLabel": "1.8",
+    "versionLabel": "1.81",
     "watchapp": {
         "watchface": true
     }
