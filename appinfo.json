@@ -11,33 +11,21 @@
     "resources": {
         "media": [
             {
-                "file": "images/grid_bw.png",
-                "name": "GRID_BW",
-                "type": "png"
-            },
-            {
-                "file": "images/tv_noise_bw.png",
-                "name": "TV_NOISE_BW",
-                "type": "png"
-            },
-            {
-                "file": "images/tv_noise_color.png",
-                "name": "TV_NOISE_COLOR",
-                "type": "png"
-            },
-            {
-                "file": "images/sunset_color.png",
-                "name": "SUNSET_COLOR",
+                "file": "images/horizontal_color_chalk.png",
+                "name": "HORIZONTAL_COLOR",
+                "targetPlatforms": [
+                    "basalt",
+                    "chalk"
+                ],
                 "type": "png"
             },
             {
                 "file": "images/vertical_color.png",
                 "name": "VERTICAL_COLOR",
-                "type": "png"
-            },
-            {
-                "file": "images/horizontal_color.png",
-                "name": "HORIZONTAL_COLOR",
+                "targetPlatforms": [
+                    "basalt",
+                    "chalk"
+                ],
                 "type": "png"
             },
             {
@@ -46,14 +34,36 @@
                 "type": "png"
             },
             {
+                "file": "images/tv_noise_bw.png",
+                "name": "TV_NOISE_BW",
+                "type": "png"
+            },
+            {
+                "file": "images/sunset_color.png",
+                "name": "SUNSET_COLOR",
+                "targetPlatforms": [
+                    "basalt",
+                    "chalk"
+                ],
+                "type": "png"
+            },
+            {
                 "file": "images/horizontal_bw.png",
                 "name": "HORIZONTAL_BW",
                 "type": "png"
             },
             {
-                "file": "images/menu.png",
-                "menuIcon": true,
-                "name": "MENU",
+                "file": "images/grid_bw.png",
+                "name": "GRID_BW",
+                "type": "png"
+            },
+            {
+                "file": "images/tv_noise_color.png",
+                "name": "TV_NOISE_COLOR",
+                "targetPlatforms": [
+                    "basalt",
+                    "chalk"
+                ],
                 "type": "png"
             },
             {
@@ -65,6 +75,12 @@
                 "file": "fonts/Molot.otf",
                 "name": "MOLOT_46",
                 "type": "font"
+            },
+            {
+                "file": "images/menu.png",
+                "menuIcon": true,
+                "name": "MENU",
+                "type": "png"
             }
         ]
     },
@@ -72,10 +88,11 @@
     "shortName": "Simple Striped",
     "targetPlatforms": [
         "aplite",
-        "basalt"
+        "basalt",
+        "chalk"
     ],
     "uuid": "b919ea5c-e0a5-4aaf-8d35-4b3b3227b532",
-    "versionLabel": "1.81",
+    "versionLabel": "2.00",
     "watchapp": {
         "watchface": true
     }

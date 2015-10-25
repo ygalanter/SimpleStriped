@@ -3,6 +3,7 @@
 
 // used to pass bimap info to get/set pixel accurately  
 typedef struct {
+   GBitmap *bitmap;  // actual bitmap for Chalk raw manipulation
    uint8_t *bitmap_data;
    int bytes_per_row;
    GBitmapFormat bitmap_format;
@@ -12,7 +13,7 @@ typedef struct {
 typedef struct {
   GBitmap*  bitmap_mask; // bitmap used for mask (when masking by bitmap)
   GBitmap*  bitmap_background; // bitmap to show thru mask
-  GColor    mask_color; //color of the mask
+  GColor*   mask_colors; //array with colors of the mask
   GColor    background_color; // color of the background
   char*     text; // text used for mask (when when masking by text)
   GFont     font; // font used for text mask;

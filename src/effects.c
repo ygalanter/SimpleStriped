@@ -5,12 +5,11 @@
   
 // { ********* Graphics utility functions (probablu should be seaparated into anothe file?) *********
   
-   
-
+  
 // set pixel color at given coordinates 
 void set_pixel(BitmapInfo bitmap_info, int y, int x, uint8_t color) {
   
-#ifdef PBL_PLATFORM_BASALT  
+#ifndef PBL_PLATFORM_APLITE  
   if (bitmap_info.bitmap_format == GBitmapFormat1BitPalette) { // for 1bit palette bitmap on Basalt --- verify if it needs to be different
      bitmap_info.bitmap_data[y*bitmap_info.bytes_per_row + x / 8] ^= (-color ^ bitmap_info.bitmap_data[y*bitmap_info.bytes_per_row + x / 8]) & (1 << (x % 8)); 
 #else
@@ -18,7 +17,14 @@ void set_pixel(BitmapInfo bitmap_info, int y, int x, uint8_t color) {
      bitmap_info.bitmap_data[y*bitmap_info.bytes_per_row + x / 8] ^= (-color ^ bitmap_info.bitmap_data[y*bitmap_info.bytes_per_row + x / 8]) & (1 << (x % 8)); 
 #endif
   } else { // othersise (assuming GBitmapFormat8Bit) going byte-wise
-     bitmap_info.bitmap_data[y*bitmap_info.bytes_per_row + x] = color;
+      
+     #ifndef PBL_PLATFORM_CHALK
+       bitmap_info.bitmap_data[y*bitmap_info.bytes_per_row + x] = color;
+     #else
+       GBitmapDataRowInfo info = gbitmap_get_data_row_info(bitmap_info.bitmap, y);
+       if ((x >= info.min_x) && (x <= info.max_x)) info.data[x] = color;
+     #endif  
+  
   }
       
 }
@@ -26,7 +32,7 @@ void set_pixel(BitmapInfo bitmap_info, int y, int x, uint8_t color) {
 // get pixel color at given coordinates 
 uint8_t get_pixel(BitmapInfo bitmap_info, int y, int x) {
 
-#ifdef PBL_PLATFORM_BASALT  
+#ifndef PBL_PLATFORM_APLITE  
   if (bitmap_info.bitmap_format == GBitmapFormat1BitPalette) { // for 1bit palette bitmap on Basalt shifting left to get correct bit
     return (bitmap_info.bitmap_data[y*bitmap_info.bytes_per_row + x / 8] << (x % 8)) & 128;
 #else
@@ -34,17 +40,29 @@ uint8_t get_pixel(BitmapInfo bitmap_info, int y, int x) {
     return (bitmap_info.bitmap_data[y*bitmap_info.bytes_per_row + x / 8] >> (x % 8)) & 1;
 #endif
   } else {  // othersise (assuming GBitmapFormat8Bit) going byte-wise
-    return bitmap_info.bitmap_data[y*bitmap_info.bytes_per_row + x]; 
+    
+    #ifndef PBL_PLATFORM_CHALK
+       return bitmap_info.bitmap_data[y*bitmap_info.bytes_per_row + x]; 
+     #else
+       GBitmapDataRowInfo info = gbitmap_get_data_row_info(bitmap_info.bitmap, y);
+       if ((x >= info.min_x) && (x <= info.max_x))
+         return info.data[x];
+       else 
+         return -1;
+     #endif  
   }
   
-}
+}  
+  
 
 // converts color between 1bit and 8bit palettes (for GBitmapFormat1BitPalette assuming black & white)
 uint8_t PalColor(uint8_t in_color, GBitmapFormat in_format, GBitmapFormat out_format) {
   
-  if ((in_format == 0 || in_format == 2) && out_format == 1) { // converting  GBitmapFormat1Bit or GBitmapFormat1BitPalette to GBitmapFormat8Bit
+  // APP_LOG(APP_LOG_LEVEL_DEBUG, "IN = %d, OUT = %d", in_format, out_format);
+ 
+  if ((in_format == 0 || in_format == 2) && (out_format == 1 || out_format == 5)) { // converting  GBitmapFormat1Bit or GBitmapFormat1BitPalette to GBitmapFormat8Bit or GBitmapFormatCircular
      return in_color == 0? 192 : 255;
-  } else if (in_format == 1 && (out_format == 0 || out_format == 2) ) { // converting GBitmapFormat8Bit to GBitmapFormat1Bit or GBitmapFormat1BitPalette 
+  } else if ((in_format == 1 || in_format == 5) && (out_format == 0 || out_format == 2) ) { // converting GBitmapFormat8Bit or GBitmapFormatCircular to GBitmapFormat1Bit or GBitmapFormat1BitPalette 
      return in_color == 255? 1 : 0;  // for now converting white to white, the rest to black
   } else {
     return in_color;
@@ -56,97 +74,111 @@ uint8_t PalColor(uint8_t in_color, GBitmapFormat in_format, GBitmapFormat out_fo
 // Small Display (256x256) resolution.
 // based on algorythm by Po-Han Lin at http://www.edepot.com
 void set_line(BitmapInfo bitmap_info, int y, int x, int y2, int x2, uint8_t draw_color, uint8_t skip_color, uint8_t *visited) {
-  bool yLonger = false;	int shortLen=y2-y; int longLen=x2-x;
+  bool yLonger = false; int shortLen=y2-y; int longLen=x2-x;
   uint8_t temp_pixel;  int temp_x, temp_y;
   
-	if (abs(shortLen)>abs(longLen)) {
-		int swap=shortLen;
-		shortLen=longLen;	longLen=swap;	yLonger=true;
-	}
+  GRect bounds = gbitmap_get_bounds(bitmap_info.bitmap);
   
-	int decInc;
-	if (longLen==0) decInc=0;
-	else decInc = (shortLen << 8) / longLen;
+  if (abs(shortLen)>abs(longLen)) {
+    int swap=shortLen;
+    shortLen=longLen; longLen=swap; yLonger=true;
+  }
+  
+  int decInc;
+  if (longLen==0) decInc=0;
+  else decInc = (shortLen << 8) / longLen;
 
-	if (yLonger) {
-		if (longLen>0) {
-			longLen+=y;
-			for (int j=0x80+(x<<8);y<=longLen;++y) {
+  if (yLonger) {
+    if (longLen>0) {
+      longLen+=y;
+      for (int j=0x80+(x<<8);y<=longLen;++y) {
         temp_y = y; temp_x = j >> 8;
-        if (temp_y >=0 && temp_y<168 && temp_x >=0 && temp_x < 144) {
+        if (temp_y >=bounds.origin.y && temp_y<bounds.size.h && temp_x >=bounds.origin.x && temp_x < bounds.size.w) {
           temp_pixel = get_pixel(bitmap_info,  temp_y, temp_x);
           #ifdef PBL_COLOR // for Basalt drawing pixel if it is not of original color or already drawn color
             if (temp_pixel != skip_color && temp_pixel != draw_color) set_pixel(bitmap_info, temp_y, temp_x, draw_color);
           #else
-            if (get_pixel(bitmap_info,  temp_y, temp_x) != 1) { // for Aplite first check if pixel isn't already marked as set in user-defined array
+            if (((visited[temp_y*20 + temp_x/8] >> (temp_x % 8)) & 1) != 1) { // for Aplite first check if pixel isn't already marked as set in user-defined array
               if (temp_pixel != skip_color) set_pixel(bitmap_info, temp_y, temp_x, draw_color); // if pixel isn't of original color - set it
               draw_color = 1 - draw_color; // revers pixel for "lined" effect
-              set_pixel(bitmap_info, temp_y, temp_x, 1); //mark pixel as set
+              visited[temp_y*20 + temp_x/8] ^= (-1 ^ visited[temp_y*20 + temp_x/8]) & (1 << (temp_x % 8)); // in Aplite - set the bit
             }
           #endif
         }
-				j+=decInc;
-			}
-			return;
-		}
-		longLen+=y;
-		for (int j=0x80+(x<<8);y>=longLen;--y) {
+        j+=decInc;
+      }
+      return;
+    }
+    longLen+=y;
+    for (int j=0x80+(x<<8);y>=longLen;--y) {
       temp_y = y; temp_x = j >> 8;
-      if (temp_y >=0 && temp_y<168 && temp_x >=0 && temp_x < 144) {
+      if (temp_y >=bounds.origin.y && temp_y<bounds.size.h && temp_x >=bounds.origin.x && temp_x < bounds.size.w) {
         temp_pixel = get_pixel(bitmap_info,  temp_y, temp_x);
           #ifdef PBL_COLOR // for Basalt drawing pixel if it is not of original color or already drawn color
             if (temp_pixel != skip_color && temp_pixel != draw_color) set_pixel(bitmap_info, temp_y, temp_x, draw_color);
           #else
-            if (get_pixel(bitmap_info,  temp_y, temp_x) != 1) { // for Aplite first check if pixel isn't already marked as set in user-defined array
+            if (((visited[temp_y*20 + temp_x/8] >> (temp_x % 8)) & 1) != 1) { // for Aplite first check if pixel isn't already marked as set in user-defined array
               if (temp_pixel != skip_color) set_pixel(bitmap_info, temp_y, temp_x, draw_color); // if pixel isn't of original color - set it
               draw_color = 1 - draw_color; // revers pixel for "lined" effect
-              set_pixel(bitmap_info, temp_y, temp_x, 1); //mark pixel as set
+              visited[temp_y*20 + temp_x/8] ^= (-1 ^ visited[temp_y*20 + temp_x/8]) & (1 << (temp_x % 8));
             }
           #endif
       }
-			j-=decInc;
-		}
-		return;	
-	}
+      j-=decInc;
+    }
+    return; 
+  }
 
-	if (longLen>0) {
-		longLen+=x;
-		for (int j=0x80+(y<<8);x<=longLen;++x) {
+  if (longLen>0) {
+    longLen+=x;
+    for (int j=0x80+(y<<8);x<=longLen;++x) {
       temp_y = j >> 8; temp_x =  x;
-      if (temp_y >=0 && temp_y<168 && temp_x >=0 && temp_x < 144) {
+      if (temp_y >=bounds.origin.y && temp_y<bounds.size.h && temp_x >=bounds.origin.x && temp_x < bounds.size.w) {
         temp_pixel = get_pixel(bitmap_info, temp_y, temp_x);
           #ifdef PBL_COLOR // for Basalt drawing pixel if it is not of original color or already drawn color
             if (temp_pixel != skip_color && temp_pixel != draw_color) set_pixel(bitmap_info, temp_y, temp_x, draw_color);
           #else
-            if (get_pixel(bitmap_info,  temp_y, temp_x) != 1) { // for Aplite first check if pixel isn't already marked as set in user-defined array
+            if (((visited[temp_y*20 + temp_x/8] >> (temp_x % 8)) & 1) != 1) { // for Aplite first check if pixel isn't already marked as set in user-defined array
               if (temp_pixel != skip_color) set_pixel(bitmap_info, temp_y, temp_x, draw_color); // if pixel isn't of original color - set it
               draw_color = 1 - draw_color; // revers pixel for "lined" effect
-              set_pixel(bitmap_info, temp_y, temp_x, 1); //mark pixel as set
+              visited[temp_y*20 + temp_x/8] ^= (-1 ^ visited[temp_y*20 + temp_x/8]) & (1 << (temp_x % 8));
             }
           #endif
       }  
-			j+=decInc;
-		}
-		return;
-	}
-	longLen+=x;
-	for (int j=0x80+(y<<8);x>=longLen;--x) {
-	  temp_y = j >> 8; temp_x =  x;
-    if (temp_y >=0 && temp_y<168 && temp_x >=0 && temp_x < 144) {
+      j+=decInc;
+    }
+    return;
+  }
+  longLen+=x;
+  for (int j=0x80+(y<<8);x>=longLen;--x) {
+    temp_y = j >> 8; temp_x =  x;
+    if (temp_y >=bounds.origin.y && temp_y<bounds.size.h && temp_x >=bounds.origin.x && temp_x < bounds.size.w) {
       temp_pixel = get_pixel(bitmap_info, temp_y, temp_x);
           #ifdef PBL_COLOR // for Basalt drawing pixel if it is not of original color or already drawn color
             if (temp_pixel != skip_color && temp_pixel != draw_color) set_pixel(bitmap_info, temp_y, temp_x, draw_color);
           #else
-            if (get_pixel(bitmap_info,  temp_y, temp_x) != 1) { // for Aplite first check if pixel isn't already marked as set in user-defined array
+            if (((visited[temp_y*20 + temp_x/8] >> (temp_x % 8)) & 1) != 1) { // for Aplite first check if pixel isn't already marked as set in user-defined array
               if (temp_pixel != skip_color) set_pixel(bitmap_info, temp_y, temp_x, draw_color); // if pixel isn't of original color - set it
               draw_color = 1 - draw_color; // revers pixel for "lined" effect
-              set_pixel(bitmap_info, temp_y, temp_x, 1); //mark pixel as set
+              visited[temp_y*20 + temp_x/8] ^= (-1 ^ visited[temp_y*20 + temp_x/8]) & (1 << (temp_x % 8));
             }
           #endif
     }  
-		j-=decInc;
-	}
+    j-=decInc;
+  }
 
+}
+
+//determine if array of colors contains specific color  
+bool gcolor_contains(GColor *color_array, GColor pixel_color)  {
+  int i=0;
+  while (!gcolor_equal(color_array[i], GColorClear)){
+    if (gcolor_equal(color_array[i], pixel_color)) {
+      return true;
+    }  
+    i++;
+  }
+  return false;
 }
 
 //  ********* Graphics utility functions (probablu should be seaparated into anothe file?) ********* }
@@ -159,6 +191,7 @@ void effect_invert(GContext* ctx,  GRect position, void* param) {
   GBitmap *fb = graphics_capture_frame_buffer(ctx);
   
   BitmapInfo bitmap_info;
+  bitmap_info.bitmap = fb;
   bitmap_info.bitmap_data =  gbitmap_get_data(fb);
   bitmap_info.bytes_per_row = gbitmap_get_bytes_per_row(fb);
   bitmap_info.bitmap_format = gbitmap_get_format(fb);
@@ -184,6 +217,7 @@ void effect_colorize(GContext* ctx,  GRect position, void* param) {
   GBitmap *fb = graphics_capture_frame_buffer(ctx);
   
   BitmapInfo bitmap_info;
+  bitmap_info.bitmap = fb;
   bitmap_info.bitmap_data =  gbitmap_get_data(fb);
   bitmap_info.bytes_per_row = gbitmap_get_bytes_per_row(fb);
   bitmap_info.bitmap_format = gbitmap_get_format(fb);
@@ -211,6 +245,7 @@ void effect_colorswap(GContext* ctx,  GRect position, void* param) {
   GBitmap *fb = graphics_capture_frame_buffer(ctx);
  
   BitmapInfo bitmap_info;
+  bitmap_info.bitmap = fb;
   bitmap_info.bitmap_data =  gbitmap_get_data(fb);
   bitmap_info.bytes_per_row = gbitmap_get_bytes_per_row(fb);
   bitmap_info.bitmap_format = gbitmap_get_format(fb);
@@ -237,6 +272,7 @@ void effect_invert_bw_only(GContext* ctx,  GRect position, void* param) {
   GBitmap *fb = graphics_capture_frame_buffer(ctx);
   
   BitmapInfo bitmap_info;
+  bitmap_info.bitmap = fb;
   bitmap_info.bitmap_data =  gbitmap_get_data(fb);
   bitmap_info.bytes_per_row = gbitmap_get_bytes_per_row(fb);
   bitmap_info.bitmap_format = gbitmap_get_format(fb);
@@ -270,6 +306,7 @@ void effect_invert_brightness(GContext* ctx,  GRect position, void* param) {
   GBitmap *fb = graphics_capture_frame_buffer(ctx);
  
   BitmapInfo bitmap_info;
+  bitmap_info.bitmap = fb;
   bitmap_info.bitmap_data =  gbitmap_get_data(fb);
   bitmap_info.bytes_per_row = gbitmap_get_bytes_per_row(fb);
   bitmap_info.bitmap_format = gbitmap_get_format(fb);
@@ -429,6 +466,7 @@ void effect_mirror_vertical(GContext* ctx, GRect position, void* param) {
   GBitmap *fb = graphics_capture_frame_buffer(ctx);
   
   BitmapInfo bitmap_info;
+  bitmap_info.bitmap = fb;
   bitmap_info.bitmap_data =  gbitmap_get_data(fb);
   bitmap_info.bytes_per_row = gbitmap_get_bytes_per_row(fb);
   bitmap_info.bitmap_format = gbitmap_get_format(fb);
@@ -452,6 +490,7 @@ void effect_mirror_horizontal(GContext* ctx, GRect position, void* param) {
   GBitmap *fb = graphics_capture_frame_buffer(ctx);
   
   BitmapInfo bitmap_info;
+  bitmap_info.bitmap = fb;
   bitmap_info.bitmap_data =  gbitmap_get_data(fb);
   bitmap_info.bytes_per_row = gbitmap_get_bytes_per_row(fb);
   bitmap_info.bitmap_format = gbitmap_get_format(fb);
@@ -475,6 +514,7 @@ void effect_rotate_90_degrees(GContext* ctx,  GRect position, void* param){
   GBitmap *fb = graphics_capture_frame_buffer(ctx);
   
   BitmapInfo bitmap_info;
+  bitmap_info.bitmap = fb;
   bitmap_info.bitmap_data =  gbitmap_get_data(fb);
   bitmap_info.bytes_per_row = gbitmap_get_bytes_per_row(fb);
   bitmap_info.bitmap_format = gbitmap_get_format(fb);
@@ -516,6 +556,7 @@ void effect_zoom(GContext* ctx,  GRect position, void* param){
   GBitmap *fb = graphics_capture_frame_buffer(ctx);
   
   BitmapInfo bitmap_info;
+  bitmap_info.bitmap = fb;
   bitmap_info.bitmap_data =  gbitmap_get_data(fb);
   bitmap_info.bytes_per_row = gbitmap_get_bytes_per_row(fb);
   bitmap_info.bitmap_format = gbitmap_get_format(fb);
@@ -551,6 +592,7 @@ void effect_lens(GContext* ctx,  GRect position, void* param){
   GBitmap *fb = graphics_capture_frame_buffer(ctx);
   
   BitmapInfo bitmap_info;
+  bitmap_info.bitmap = fb;
   bitmap_info.bitmap_data =  gbitmap_get_data(fb);
   bitmap_info.bytes_per_row = gbitmap_get_bytes_per_row(fb);
   bitmap_info.bitmap_format = gbitmap_get_format(fb);
@@ -595,7 +637,7 @@ void effect_mask(GContext* ctx, GRect position, void* param) {
   
   //if text mask is used - drawing text
   if (mask->text) {
-     graphics_context_set_text_color(ctx, mask->mask_color);
+     graphics_context_set_text_color(ctx, mask->mask_colors[0]); // for text using only 1st color from array of mask colors
      graphics_draw_text(ctx, mask->text, mask->font, GRect(0, 0, position.size.w, position.size.h), mask->text_overflow, mask->text_align, NULL);
   } else if (mask->bitmap_mask) { // othersise - bitmap mask is used - draw bimap
      graphics_draw_bitmap_in_rect(ctx, mask->bitmap_mask, GRect(0, 0, position.size.w, position.size.h));
@@ -605,12 +647,14 @@ void effect_mask(GContext* ctx, GRect position, void* param) {
   GBitmap *fb = graphics_capture_frame_buffer(ctx);
   
   BitmapInfo bitmap_info;
+  bitmap_info.bitmap = fb;
   bitmap_info.bitmap_data =  gbitmap_get_data(fb);
   bitmap_info.bytes_per_row = gbitmap_get_bytes_per_row(fb);
   bitmap_info.bitmap_format = gbitmap_get_format(fb);
   
   //capturing background bitmap
   BitmapInfo bg_bitmap_info;
+  bg_bitmap_info.bitmap = mask->bitmap_background;
   bg_bitmap_info.bitmap_data =  gbitmap_get_data(mask->bitmap_background);
   bg_bitmap_info.bytes_per_row =  gbitmap_get_bytes_per_row(mask->bitmap_background);
   bg_bitmap_info.bitmap_format = gbitmap_get_format(mask->bitmap_background);
@@ -618,12 +662,13 @@ void effect_mask(GContext* ctx, GRect position, void* param) {
   //looping throughout layer replacing mask with bg bitmap
   for (int y = 0; y < position.size.h; y++)
      for (int x = 0; x < position.size.w; x++) {
-       temp_pixel = (GColor)get_pixel(bitmap_info, y + position.origin.y, x + position.origin.x);
-       if (gcolor_equal(temp_pixel, mask->mask_color)) {
+      temp_pixel = (GColor)get_pixel(bitmap_info, y + position.origin.y, x + position.origin.x);
+       if ( gcolor_contains(mask->mask_colors, temp_pixel)) { // if array of mask colors matches current screen pixel color:
          // getting pixel from background bitmap (adjusted to pallette by PalColor function because palette of bg bitmap and framebuffer may differ)
-         // *** APP_LOG(APP_LOG_LEVEL_DEBUG, "get_pixel = %d, pal_color = %d", get_pixel(bg_bitmap_info, y + position.origin.y, x + position.origin.x), PalColor(get_pixel(bg_bitmap_info, y + position.origin.y, x + position.origin.x), bg_bitmap_info.bitmap_format, bitmap_info.bitmap_format));
-         set_pixel(bitmap_info, y + position.origin.y, x + position.origin.x, PalColor(get_pixel(bg_bitmap_info, y + position.origin.y, x + position.origin.x), bg_bitmap_info.bitmap_format, bitmap_info.bitmap_format));
+         // YG OCT-25-2015: replaced "y + position.origin.y, x + position.origin.x" with "y + 0, x + 0" since in mask bitmap we start without offset
+         set_pixel(bitmap_info, y + position.origin.y, x + position.origin.x, PalColor(get_pixel(bg_bitmap_info, y + 0, x + 0), bg_bitmap_info.bitmap_format, bitmap_info.bitmap_format));
        } 
+  
   }
   
   graphics_release_frame_buffer(ctx, fb);
@@ -669,6 +714,7 @@ void effect_shadow(GContext* ctx, GRect position, void* param) {
   GBitmap *fb = graphics_capture_frame_buffer(ctx);
   
   BitmapInfo bitmap_info;
+  bitmap_info.bitmap = fb;
   bitmap_info.bitmap_data =  gbitmap_get_data(fb);
   bitmap_info.bytes_per_row = gbitmap_get_bytes_per_row(fb);
   bitmap_info.bitmap_format = gbitmap_get_format(fb);
@@ -716,14 +762,15 @@ void effect_shadow(GContext* ctx, GRect position, void* param) {
 
 void effect_outline(GContext* ctx, GRect position, void* param) {
   GColor temp_pixel;  
-  int outlinex[4];
-  int outliney[4];
+  int outlinex[8];
+  int outliney[8];
   EffectOffset *outline = (EffectOffset *)param;
   
    //capturing framebuffer bitmap
   GBitmap *fb = graphics_capture_frame_buffer(ctx);
   
   BitmapInfo bitmap_info;
+  bitmap_info.bitmap = fb;
   bitmap_info.bitmap_data =  gbitmap_get_data(fb);
   bitmap_info.bytes_per_row = gbitmap_get_bytes_per_row(fb);
   bitmap_info.bitmap_format = gbitmap_get_format(fb);
@@ -731,36 +778,38 @@ void effect_outline(GContext* ctx, GRect position, void* param) {
   
   //loop through pixels from framebuffer
   for (int y = 0; y < position.size.h; y++)
-     for (int x = 0; x < position.size.w; x++) {
-       temp_pixel = (GColor)get_pixel(bitmap_info, y + position.origin.y, x + position.origin.x);
+    for (int x = 0; x < position.size.w; x++) {
+      for (int a = 0; a <= outline->offset_x; a++) 
+        for (int b = 0; b <= outline->offset_y; b++) {
+  
+          temp_pixel = (GColor)get_pixel(bitmap_info, y + position.origin.y, x + position.origin.x);
        
-       if (gcolor_equal(temp_pixel, outline->orig_color)) {
-          // TODO: there's probably a more efficient way to do this
-          outlinex[0] = x + position.origin.x - outline->offset_x;
-          outliney[0] = y + position.origin.y - outline->offset_y;
-          outlinex[1] = x + position.origin.x + outline->offset_x;
-          outliney[1] = y + position.origin.y + outline->offset_y;
-          outlinex[2] = x + position.origin.x - outline->offset_x;
-          outliney[2] = y + position.origin.y + outline->offset_y;
-          outlinex[3] = x + position.origin.x + outline->offset_x;
-          outliney[3] = y + position.origin.y - outline->offset_y;
-          
+          if (gcolor_equal(temp_pixel, outline->orig_color)) {
+            outlinex[0] = x + position.origin.x - a;
+            outliney[0] = y + position.origin.y - b;
+            outlinex[1] = x + position.origin.x + a;
+            outliney[1] = y + position.origin.y + b;
+            outlinex[2] = x + position.origin.x - a;
+            outliney[2] = y + position.origin.y + b;
+            outlinex[3] = x + position.origin.x + a;
+            outliney[3] = y + position.origin.y - b;
          
-          for (int i = 0; i < 4; i++) {
-            // TODO: centralize the constants
-            if (outlinex[i] >= 0 && outlinex[i] <=144 && outliney[i] >= 0 && outliney[i] <= 168) {
-              temp_pixel = (GColor)get_pixel(bitmap_info, outliney[i], outlinex[i]);
-              if (!gcolor_equal(temp_pixel, outline->orig_color)) {
-                #ifdef PBL_COLOR
-                   set_pixel(bitmap_info, outliney[i], outlinex[i], outline->offset_color.argb);  
-                #else
-                   set_pixel(bitmap_info, outliney[i], outlinex[i], gcolor_equal(outline->offset_color, GColorWhite)? 1 : 0);
-                #endif
+            for (int i = 0; i < 4; i++) {
+              // TODO: centralize the constants
+              if (outlinex[i] >= 0 && outlinex[i] <=144 && outliney[i] >= 0 && outliney[i] <= 168) {
+                temp_pixel = (GColor)get_pixel(bitmap_info, outliney[i], outlinex[i]);
+                if (!gcolor_equal(temp_pixel, outline->orig_color)) {
+                  #ifdef PBL_COLOR
+                    set_pixel(bitmap_info, outliney[i], outlinex[i], outline->offset_color.argb);  
+                  #else
+                    set_pixel(bitmap_info, outliney[i], outlinex[i], gcolor_equal(outline->offset_color, GColorWhite)? 1 : 0);
+                  #endif
+                }
               }
             }
           }
-       }
-  }
+        }
+    }
 
   graphics_release_frame_buffer(ctx, fb);
 }
