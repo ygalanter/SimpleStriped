@@ -20,5 +20,5 @@ int pattern_array[20] =
     #endif    
   };
 
-#define BACKGROUND_W 130
+#define BACKGROUND_W 144
 #define BACKGROUND_H 160

@@ -6,19 +6,11 @@
         "configurable"
     ],
     "companyName": "yuri@galanter.net",
+    "enableMultiJS": true,
     "longName": "Simple Striped",
     "projectType": "native",
     "resources": {
         "media": [
-            {
-                "file": "images/horizontal_color_chalk.png",
-                "name": "HORIZONTAL_COLOR",
-                "targetPlatforms": [
-                    "basalt",
-                    "chalk"
-                ],
-                "type": "png"
-            },
             {
                 "file": "images/vertical_color.png",
                 "name": "VERTICAL_COLOR",
@@ -26,36 +18,12 @@
                     "basalt",
                     "chalk"
                 ],
-                "type": "png"
+                "type": "bitmap"
             },
             {
                 "file": "images/vertical_bw.png",
                 "name": "VERTICAL_BW",
-                "type": "png"
-            },
-            {
-                "file": "images/tv_noise_bw.png",
-                "name": "TV_NOISE_BW",
-                "type": "png"
-            },
-            {
-                "file": "images/sunset_color.png",
-                "name": "SUNSET_COLOR",
-                "targetPlatforms": [
-                    "basalt",
-                    "chalk"
-                ],
-                "type": "png"
-            },
-            {
-                "file": "images/horizontal_bw.png",
-                "name": "HORIZONTAL_BW",
-                "type": "png"
-            },
-            {
-                "file": "images/grid_bw.png",
-                "name": "GRID_BW",
-                "type": "png"
+                "type": "bitmap"
             },
             {
                 "file": "images/tv_noise_color.png",
@@ -64,12 +32,46 @@
                     "basalt",
                     "chalk"
                 ],
-                "type": "png"
+                "type": "bitmap"
             },
             {
-                "file": "fonts/Molot.otf",
-                "name": "MOLOT_52",
-                "type": "font"
+                "file": "images/tv_noise_bw.png",
+                "name": "TV_NOISE_BW",
+                "type": "bitmap"
+            },
+            {
+                "file": "images/sunset_color.png",
+                "name": "SUNSET_COLOR",
+                "targetPlatforms": [
+                    "basalt",
+                    "chalk"
+                ],
+                "type": "bitmap"
+            },
+            {
+                "file": "images/menu.png",
+                "menuIcon": true,
+                "name": "MENU",
+                "type": "bitmap"
+            },
+            {
+                "file": "images/horizontal_color_chalk.png",
+                "name": "HORIZONTAL_COLOR",
+                "targetPlatforms": [
+                    "basalt",
+                    "chalk"
+                ],
+                "type": "bitmap"
+            },
+            {
+                "file": "images/horizontal_bw.png",
+                "name": "HORIZONTAL_BW",
+                "type": "bitmap"
+            },
+            {
+                "file": "images/grid_bw.png",
+                "name": "GRID_BW",
+                "type": "bitmap"
             },
             {
                 "file": "fonts/Molot.otf",
@@ -77,10 +79,9 @@
                 "type": "font"
             },
             {
-                "file": "images/menu.png",
-                "menuIcon": true,
-                "name": "MENU",
-                "type": "png"
+                "file": "fonts/Molot.otf",
+                "name": "MOLOT_52",
+                "type": "font"
             }
         ]
     },
@@ -92,7 +93,7 @@
         "chalk"
     ],
     "uuid": "b919ea5c-e0a5-4aaf-8d35-4b3b3227b532",
-    "versionLabel": "2.1",
+    "versionLabel": "2.2",
     "watchapp": {
         "watchface": true
     }

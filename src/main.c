@@ -16,15 +16,6 @@ static int current_pattern; // currently loaded pattern
 static GBitmap *background;
 Layer *battery_layer;
 
-#ifndef PBL_SDK_2
-static void app_focus_changed(bool focused) {
-  if (focused) { // on resuming focus - restore background
-    layer_mark_dirty(effect_layer_get_layer(effect_layer));
-  }
-}
-#endif
-
-
 
 // changes pattern of background
 static void change_pattern(int pattern) {
@@ -76,7 +67,7 @@ static void battery_update(Layer *layer, GContext *ctx) {
    graphics_context_set_fill_color(ctx, color);  
      
    #ifdef PBL_ROUND  
-      graphics_fill_radial(ctx, bounds, GOvalScaleModeFitCircle, 8, DEG_TO_TRIGANGLE(180 - 180*percent/100), DEG_TO_TRIGANGLE(180 + 180*percent/100));
+      graphics_fill_radial(ctx, bounds, GOvalScaleModeFitCircle, 4, DEG_TO_TRIGANGLE(180 - 180*percent/100), DEG_TO_TRIGANGLE(180 + 180*percent/100));
    #else
       graphics_fill_rect(ctx, GRect(bounds.size.w/2 - (bounds.size.w/2)*percent/100, bounds.size.h - 2 , bounds.size.w*percent/100, 2), 0, GCornerNone) ;
    #endif
@@ -152,14 +143,7 @@ void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
 
 void handle_init(void) {
   
-  
-  #ifndef PBL_SDK_2
-  // need to catch when app resumes focus after notification, otherwise background won't restore
-  app_focus_service_subscribe_handlers((AppFocusHandlers){
-    .did_focus = app_focus_changed
-  });
-  #endif
-  
+
   
   my_window = window_create();
   
@@ -228,10 +212,6 @@ void handle_init(void) {
 }
 
 void handle_deinit(void) {
-  
-  #ifndef PBL_SDK_2
-    app_focus_service_unsubscribe();
-  #endif
   
   //clearning MASK
   gbitmap_destroy(background);

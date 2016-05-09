@@ -9,13 +9,12 @@
 // set pixel color at given coordinates 
 void set_pixel(BitmapInfo bitmap_info, int y, int x, uint8_t color) {
   
-#ifndef PBL_PLATFORM_APLITE  
-  if (bitmap_info.bitmap_format == GBitmapFormat1BitPalette) { // for 1bit palette bitmap on Basalt --- verify if it needs to be different
-     bitmap_info.bitmap_data[y*bitmap_info.bytes_per_row + x / 8] ^= (-color ^ bitmap_info.bitmap_data[y*bitmap_info.bytes_per_row + x / 8]) & (1 << (x % 8)); 
-#else
-  if (bitmap_info.bitmap_format == GBitmapFormat1Bit) { // for 1 bit bitmap on Aplite  --- verify if it needs to be different
-     bitmap_info.bitmap_data[y*bitmap_info.bytes_per_row + x / 8] ^= (-color ^ bitmap_info.bitmap_data[y*bitmap_info.bytes_per_row + x / 8]) & (1 << (x % 8)); 
-#endif
+  if (bitmap_info.bitmap_format == GBitmapFormat1Bit || bitmap_info.bitmap_format == GBitmapFormat1BitPalette) { // for 1 bit bitmap on Aplite  --- verify if it needs to be different
+    
+    color = (color == GColorWhiteARGB8? 1: 0); // YG 2016-05-09: SDK3 update - White Color means 1 in 1bit bitmapsm; Black Means 0
+   
+    bitmap_info.bitmap_data[y*bitmap_info.bytes_per_row + x / 8] ^= (-color ^ bitmap_info.bitmap_data[y*bitmap_info.bytes_per_row + x / 8]) & (1 << (x % 8)); 
+    
   } else { // othersise (assuming GBitmapFormat8Bit) going byte-wise
       
      #ifndef PBL_PLATFORM_CHALK
@@ -32,13 +31,11 @@ void set_pixel(BitmapInfo bitmap_info, int y, int x, uint8_t color) {
 // get pixel color at given coordinates 
 uint8_t get_pixel(BitmapInfo bitmap_info, int y, int x) {
 
-#ifndef PBL_PLATFORM_APLITE  
-  if (bitmap_info.bitmap_format == GBitmapFormat1BitPalette) { // for 1bit palette bitmap on Basalt shifting left to get correct bit
-    return (bitmap_info.bitmap_data[y*bitmap_info.bytes_per_row + x / 8] << (x % 8)) & 128;
-#else
-  if (bitmap_info.bitmap_format == GBitmapFormat1Bit) { // for 1 bit bitmap on Aplite - shifting right to get bit
-    return (bitmap_info.bitmap_data[y*bitmap_info.bytes_per_row + x / 8] >> (x % 8)) & 1;
-#endif
+  if (bitmap_info.bitmap_format == GBitmapFormat1Bit || bitmap_info.bitmap_format == GBitmapFormat1BitPalette) { // for 1 bit bitmap on Aplite - shifting right to get bit
+    
+    // YG 2016-05-09: SDK3 update - 1 means White color in 1bit bitmals; 2 means Black
+    return ((bitmap_info.bitmap_data[y*bitmap_info.bytes_per_row + x / 8] >> (x % 8)) & 1) == 1? GColorWhiteARGB8: GColorBlackARGB8;
+    
   } else {  // othersise (assuming GBitmapFormat8Bit) going byte-wise
     
     #ifndef PBL_PLATFORM_CHALK
@@ -55,20 +52,6 @@ uint8_t get_pixel(BitmapInfo bitmap_info, int y, int x) {
 }  
   
 
-// converts color between 1bit and 8bit palettes (for GBitmapFormat1BitPalette assuming black & white)
-uint8_t PalColor(uint8_t in_color, GBitmapFormat in_format, GBitmapFormat out_format) {
-  
-  // APP_LOG(APP_LOG_LEVEL_DEBUG, "IN = %d, OUT = %d", in_format, out_format);
- 
-  if ((in_format == 0 || in_format == 2) && (out_format == 1 || out_format == 5)) { // converting  GBitmapFormat1Bit or GBitmapFormat1BitPalette to GBitmapFormat8Bit or GBitmapFormatCircular
-     return in_color == 0? 192 : 255;
-  } else if ((in_format == 1 || in_format == 5) && (out_format == 0 || out_format == 2) ) { // converting GBitmapFormat8Bit or GBitmapFormatCircular to GBitmapFormat1Bit or GBitmapFormat1BitPalette 
-     return in_color == 255? 1 : 0;  // for now converting white to white, the rest to black
-  } else {
-    return in_color;
-  }
-}
- 
 
 // THE EXTREMELY FAST LINE ALGORITHM Variation E (Addition Fixed Point PreCalc Small Display)
 // Small Display (256x256) resolution.
@@ -652,6 +635,8 @@ void effect_mask(GContext* ctx, GRect position, void* param) {
   bitmap_info.bytes_per_row = gbitmap_get_bytes_per_row(fb);
   bitmap_info.bitmap_format = gbitmap_get_format(fb);
   
+  //APP_LOG(APP_LOG_LEVEL_DEBUG, "FB bitmap format: %i", bitmap_info.bitmap_format);
+  
   //capturing background bitmap
   BitmapInfo bg_bitmap_info;
   bg_bitmap_info.bitmap = mask->bitmap_background;
@@ -659,14 +644,14 @@ void effect_mask(GContext* ctx, GRect position, void* param) {
   bg_bitmap_info.bytes_per_row =  gbitmap_get_bytes_per_row(mask->bitmap_background);
   bg_bitmap_info.bitmap_format = gbitmap_get_format(mask->bitmap_background);
   
+  //APP_LOG(APP_LOG_LEVEL_DEBUG, "BG bitmap format: %i", bg_bitmap_info.bitmap_format);
+  
   //looping throughout layer replacing mask with bg bitmap
   for (int y = 0; y < position.size.h; y++)
      for (int x = 0; x < position.size.w; x++) {
       temp_pixel = (GColor)get_pixel(bitmap_info, y + position.origin.y, x + position.origin.x);
        if ( gcolor_contains(mask->mask_colors, temp_pixel)) { // if array of mask colors matches current screen pixel color:
-         // getting pixel from background bitmap (adjusted to pallette by PalColor function because palette of bg bitmap and framebuffer may differ)
-         // YG OCT-25-2015: replaced "y + position.origin.y, x + position.origin.x" with "y + 0, x + 0" since in mask bitmap we start without offset
-         set_pixel(bitmap_info, y + position.origin.y, x + position.origin.x, PalColor(get_pixel(bg_bitmap_info, y + 0, x + 0), bg_bitmap_info.bitmap_format, bitmap_info.bitmap_format));
+         set_pixel(bitmap_info, y + position.origin.y, x + position.origin.x, get_pixel(bg_bitmap_info, y + 0, x + 0));
        } 
   
   }
