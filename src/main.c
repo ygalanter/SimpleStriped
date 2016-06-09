@@ -1,6 +1,6 @@
 #include <pebble.h>
 #include "main.h"  
-#include "effect_layer.h"
+#include <pebble-effect-layer/pebble-effect-layer.h>
 
 static Window *my_window;
 

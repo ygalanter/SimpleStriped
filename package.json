@@ -1,0 +1,106 @@
+{
+    "author": "yuri@galanter.net",
+    "dependencies": {
+        "pebble-effect-layer": "^1.0.0"
+    },
+    "keywords": [],
+    "name": "simple-striped",
+    "pebble": {
+        "capabilities": [
+            "configurable"
+        ],
+        "displayName": "Simple Striped",
+        "enableMultiJS": true,
+        "messageKeys": {
+            "KEY_PATTERN": 0
+        },
+        "projectType": "native",
+        "resources": {
+            "media": [
+                {
+                    "file": "images/vertical_color.png",
+                    "name": "VERTICAL_COLOR",
+                    "targetPlatforms": [
+                        "basalt",
+                        "chalk"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/vertical_bw.png",
+                    "name": "VERTICAL_BW",
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/tv_noise_color.png",
+                    "name": "TV_NOISE_COLOR",
+                    "targetPlatforms": [
+                        "basalt",
+                        "chalk"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/tv_noise_bw.png",
+                    "name": "TV_NOISE_BW",
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/sunset_color.png",
+                    "name": "SUNSET_COLOR",
+                    "targetPlatforms": [
+                        "basalt",
+                        "chalk"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/menu.png",
+                    "menuIcon": true,
+                    "name": "MENU",
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/horizontal_color_chalk.png",
+                    "name": "HORIZONTAL_COLOR",
+                    "targetPlatforms": [
+                        "basalt",
+                        "chalk"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/horizontal_bw.png",
+                    "name": "HORIZONTAL_BW",
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/grid_bw.png",
+                    "name": "GRID_BW",
+                    "type": "bitmap"
+                },
+                {
+                    "file": "fonts/Molot.otf",
+                    "name": "MOLOT_46",
+                    "type": "font"
+                },
+                {
+                    "file": "fonts/Molot.otf",
+                    "name": "MOLOT_52",
+                    "type": "font"
+                }
+            ]
+        },
+        "sdkVersion": "3",
+        "targetPlatforms": [
+            "aplite",
+            "basalt",
+            "chalk"
+        ],
+        "uuid": "b919ea5c-e0a5-4aaf-8d35-4b3b3227b532",
+        "watchapp": {
+            "watchface": true
+        }
+    },
+    "version": "2.3.0"
+}
