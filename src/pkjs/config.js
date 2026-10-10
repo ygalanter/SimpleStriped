@@ -3,7 +3,8 @@ var bwPatterns = [
   { label: 'Horizontal Stripes', value: '0' },
   { label: 'Vertical Stripes', value: '1' },
   { label: 'TV Noise', value: '2' },
-  { label: 'Grid', value: '3' }
+  { label: 'Grid', value: '3' },
+  { label: 'Solid Color', value: '20' }
 ];
 
 var colorPatterns = [
@@ -14,7 +15,8 @@ var colorPatterns = [
   { label: 'TV Noise', value: '2' },
   { label: 'TV Noise Color', value: '12' },
   { label: 'Grid', value: '3' },
-  { label: 'Sea Sunset', value: '13' }
+  { label: 'Sea Sunset', value: '13' },
+  { label: 'Solid Color', value: '20' }
 ];
 
 module.exports = [
@@ -42,6 +44,20 @@ module.exports = [
         defaultValue: '0',
         capabilities: ['COLOR'],
         options: colorPatterns
+      },
+      // color pickers are shown only when "Solid Color" is selected (see custom-clay.js).
+      // Clay limits them to black & white on B&W watches
+      {
+        type: 'color',
+        messageKey: 'TEXT_COLOR',
+        label: 'Time and date color',
+        defaultValue: '0xFFFFFF'
+      },
+      {
+        type: 'color',
+        messageKey: 'BG_COLOR',
+        label: 'Screen color',
+        defaultValue: '0x000000'
       }
     ]
   },

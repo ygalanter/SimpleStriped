@@ -1,11 +1,15 @@
 #pragma once
 #include <pebble.h>
 
-// persistent storage key for selected pattern (kept at 0 so settings survive upgrades)
+// persistent storage keys (pattern kept at 0 so settings survive upgrades)
 #define PERSIST_KEY_PATTERN 0
+#define PERSIST_KEY_TEXT_COLOR 1
+#define PERSIST_KEY_BG_COLOR 2
 
 // patterns: B&W are 0-9, color are 10-19 (values come from the config page)
 #define PATTERN_BW_TRESHOLD 10
+// no pattern: date & time drawn in solid text color over solid screen color
+#define PATTERN_SOLID 20
 
 // size of the pattern bitmaps and positions of date / time / day-of-week rows,
 // relative to the top of the (centered) pattern area

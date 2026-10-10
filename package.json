@@ -1,6 +1,6 @@
 {
   "name": "simple-striped",
-  "author": "Yuriy Galanter",
+  "author": "Comfortably Numb",
   "version": "3.0.0",
   "description": "Big bold date and time with see-through patterned digits",
   "keywords": [
@@ -35,7 +35,9 @@
       "configurable"
     ],
     "messageKeys": [
-      "PATTERN"
+      "PATTERN",
+      "TEXT_COLOR",
+      "BG_COLOR"
     ],
     "resources": {
       "media": [

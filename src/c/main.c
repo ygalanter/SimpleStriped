@@ -15,6 +15,7 @@ static char s_time[] = "HOWRE"; //test
 static char s_dow[] = "YOU"; //test
 
 static int current_pattern; // currently loaded pattern
+static GColor text_color, bg_color; // used by solid color "pattern"
 static GBitmap *background;
 static Layer *battery_layer;
 
@@ -38,8 +39,15 @@ static uint32_t pattern_resource(int pattern) {
   }
 }
 
+static void set_text_color(GColor color) {
+  text_layer_set_text_color(text_date, color);
+  text_layer_set_text_color(text_time, color);
+  text_layer_set_text_color(text_dow, color);
+}
+
 // changes pattern of background
 static void change_pattern(int pattern) {
+  bool solid = pattern == PATTERN_SOLID;
 
   // destroying existing pattern
   if (background != NULL) {
@@ -47,13 +55,24 @@ static void change_pattern(int pattern) {
     background = NULL;
   }
 
-  // and creating new one
-  background = gbitmap_create_with_resource(pattern_resource(pattern));
+  // and creating new one (solid color doesn't need a bitmap or the mask)
+  if (!solid) {
+    background = gbitmap_create_with_resource(pattern_resource(pattern));
+  }
   mask.bitmap_background = background;
+  layer_set_hidden(effect_layer_get_layer(effect_layer), solid);
 
-  //for b&w patterns do a b&w background
-  window_set_background_color(my_window,
-    PBL_IF_COLOR_ELSE(pattern < PATTERN_BW_TRESHOLD ? GColorBlack : GColorOxfordBlue, GColorBlack));
+  // mask replaces white pixels with the pattern, so text must stay white for patterns
+  set_text_color(solid ? text_color : GColorWhite);
+
+  if (solid) {
+    window_set_background_color(my_window, bg_color);
+  } else {
+    //for b&w patterns do a b&w background
+    window_set_background_color(my_window,
+      PBL_IF_COLOR_ELSE(pattern < PATTERN_BW_TRESHOLD ? GColorBlack : GColorOxfordBlue, GColorBlack));
+  }
+  layer_mark_dirty(battery_layer);
 }
 
 static GColor battery_color(int percent) {
@@ -75,7 +94,12 @@ static GColor battery_color(int percent) {
 static void battery_update(Layer *layer, GContext *ctx) {
    int percent = battery_state_service_peek().charge_percent;
 
-   graphics_context_set_fill_color(ctx, battery_color(percent));
+   GColor color = battery_color(percent);
+   // don't let the bar vanish into a solid screen color
+   if (current_pattern == PATTERN_SOLID && gcolor_equal(color, bg_color)) {
+     color = text_color;
+   }
+   graphics_context_set_fill_color(ctx, color);
 
    #ifdef PBL_ROUND
       GRect bounds = layer_get_bounds(layer);
@@ -127,15 +151,27 @@ static void unobstructed_did_change(void *context) {
 
 // handle configuration change
 static void in_recv_handler(DictionaryIterator *iterator, void *context) {
-  Tuple *t = dict_find(iterator, MESSAGE_KEY_PATTERN);
+  Tuple *t = dict_find(iterator, MESSAGE_KEY_TEXT_COLOR);
+  if (t) {
+    text_color = GColorFromHEX(t->value->int32);
+    persist_write_int(PERSIST_KEY_TEXT_COLOR, text_color.argb);
+  }
 
+  t = dict_find(iterator, MESSAGE_KEY_BG_COLOR);
+  if (t) {
+    bg_color = GColorFromHEX(t->value->int32);
+    persist_write_int(PERSIST_KEY_BG_COLOR, bg_color.argb);
+  }
+
+  t = dict_find(iterator, MESSAGE_KEY_PATTERN);
   if (t) {
     // Clay sends radio values as strings, older config pages sent numbers
     current_pattern = t->type == TUPLE_CSTRING ? atoi(t->value->cstring) : (int)t->value->int32;
     persist_write_int(PERSIST_KEY_PATTERN, current_pattern);
-    change_pattern(current_pattern);
-    layer_mark_dirty(effect_layer_get_layer(effect_layer));
   }
+
+  change_pattern(current_pattern);
+  layer_mark_dirty(effect_layer_get_layer(effect_layer));
 }
 
 static void battery_handler(BatteryChargeState state) {
@@ -204,16 +240,18 @@ static void window_load(Window *window) {
 
   mask.background_color = GColorClear;
 
-  // reading and setting background pattern
-  current_pattern = persist_exists(PERSIST_KEY_PATTERN) ? persist_read_int(PERSIST_KEY_PATTERN) : 0;
-  change_pattern(current_pattern);
-
   // ** end setup mask }
 
   //creating effect layer
   effect_layer = effect_layer_create(GRect((bounds.size.w-BACKGROUND_W)/2, (bounds.size.h-BACKGROUND_H)/2, BACKGROUND_W, BACKGROUND_H));
   effect_layer_add_effect(effect_layer, effect_mask, &mask);
   layer_add_child(window_layer, effect_layer_get_layer(effect_layer));
+
+  // reading and setting background pattern and solid colors
+  current_pattern = persist_exists(PERSIST_KEY_PATTERN) ? persist_read_int(PERSIST_KEY_PATTERN) : 0;
+  text_color = persist_exists(PERSIST_KEY_TEXT_COLOR) ? (GColor){ .argb = persist_read_int(PERSIST_KEY_TEXT_COLOR) } : GColorWhite;
+  bg_color = persist_exists(PERSIST_KEY_BG_COLOR) ? (GColor){ .argb = persist_read_int(PERSIST_KEY_BG_COLOR) } : GColorBlack;
+  change_pattern(current_pattern);
 
   layout();
 }
