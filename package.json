@@ -1,106 +1,253 @@
 {
-    "author": "yuri@galanter.net",
-    "dependencies": {
-        "pebble-effect-layer": "^1.0.0"
+  "name": "simple-striped",
+  "author": "Yuriy Galanter",
+  "version": "3.0.0",
+  "description": "Big bold date and time with see-through patterned digits",
+  "keywords": [
+    "pebble-app",
+    "watchface"
+  ],
+  "private": true,
+  "license": "MIT",
+  "dependencies": {
+    "@rebble/clay": "^1.1.0",
+    "pebble-effect-layer": "^1.5.0"
+  },
+  "pebble": {
+    "displayName": "Simple Striped",
+    "uuid": "b919ea5c-e0a5-4aaf-8d35-4b3b3227b532",
+    "sdkVersion": "3",
+    "projectType": "native",
+    "enableMultiJS": true,
+    "targetPlatforms": [
+      "aplite",
+      "basalt",
+      "chalk",
+      "diorite",
+      "emery",
+      "flint",
+      "gabbro"
+    ],
+    "watchapp": {
+      "watchface": true
     },
-    "keywords": [],
-    "name": "simple-striped",
-    "pebble": {
-        "capabilities": [
-            "configurable"
-        ],
-        "displayName": "Simple Striped",
-        "enableMultiJS": true,
-        "messageKeys": {
-            "KEY_PATTERN": 0
-        },
-        "projectType": "native",
-        "resources": {
-            "media": [
-                {
-                    "file": "images/vertical_color.png",
-                    "name": "VERTICAL_COLOR",
-                    "targetPlatforms": [
-                        "basalt",
-                        "chalk"
-                    ],
-                    "type": "bitmap"
-                },
-                {
-                    "file": "images/vertical_bw.png",
-                    "name": "VERTICAL_BW",
-                    "type": "bitmap"
-                },
-                {
-                    "file": "images/tv_noise_color.png",
-                    "name": "TV_NOISE_COLOR",
-                    "targetPlatforms": [
-                        "basalt",
-                        "chalk"
-                    ],
-                    "type": "bitmap"
-                },
-                {
-                    "file": "images/tv_noise_bw.png",
-                    "name": "TV_NOISE_BW",
-                    "type": "bitmap"
-                },
-                {
-                    "file": "images/sunset_color.png",
-                    "name": "SUNSET_COLOR",
-                    "targetPlatforms": [
-                        "basalt",
-                        "chalk"
-                    ],
-                    "type": "bitmap"
-                },
-                {
-                    "file": "images/menu.png",
-                    "menuIcon": true,
-                    "name": "MENU",
-                    "type": "bitmap"
-                },
-                {
-                    "file": "images/horizontal_color_chalk.png",
-                    "name": "HORIZONTAL_COLOR",
-                    "targetPlatforms": [
-                        "basalt",
-                        "chalk"
-                    ],
-                    "type": "bitmap"
-                },
-                {
-                    "file": "images/horizontal_bw.png",
-                    "name": "HORIZONTAL_BW",
-                    "type": "bitmap"
-                },
-                {
-                    "file": "images/grid_bw.png",
-                    "name": "GRID_BW",
-                    "type": "bitmap"
-                },
-                {
-                    "file": "fonts/Molot.otf",
-                    "name": "MOLOT_46",
-                    "type": "font"
-                },
-                {
-                    "file": "fonts/Molot.otf",
-                    "name": "MOLOT_52",
-                    "type": "font"
-                }
-            ]
-        },
-        "sdkVersion": "3",
-        "targetPlatforms": [
+    "capabilities": [
+      "configurable"
+    ],
+    "messageKeys": [
+      "PATTERN"
+    ],
+    "resources": {
+      "media": [
+        {
+          "type": "bitmap",
+          "name": "HORIZONTAL_BW",
+          "file": "images/horizontal_bw.png",
+          "targetPlatforms": [
             "aplite",
             "basalt",
+            "chalk",
+            "diorite",
+            "flint"
+          ]
+        },
+        {
+          "type": "bitmap",
+          "name": "HORIZONTAL_BW",
+          "file": "images/large/horizontal_bw.png",
+          "targetPlatforms": [
+            "emery",
+            "gabbro"
+          ]
+        },
+        {
+          "type": "bitmap",
+          "name": "HORIZONTAL_COLOR",
+          "file": "images/horizontal_color.png",
+          "targetPlatforms": [
+            "basalt",
             "chalk"
-        ],
-        "uuid": "b919ea5c-e0a5-4aaf-8d35-4b3b3227b532",
-        "watchapp": {
-            "watchface": true
+          ]
+        },
+        {
+          "type": "bitmap",
+          "name": "HORIZONTAL_COLOR",
+          "file": "images/large/horizontal_color.png",
+          "targetPlatforms": [
+            "emery",
+            "gabbro"
+          ]
+        },
+        {
+          "type": "bitmap",
+          "name": "VERTICAL_BW",
+          "file": "images/vertical_bw.png",
+          "targetPlatforms": [
+            "aplite",
+            "basalt",
+            "chalk",
+            "diorite",
+            "flint"
+          ]
+        },
+        {
+          "type": "bitmap",
+          "name": "VERTICAL_BW",
+          "file": "images/large/vertical_bw.png",
+          "targetPlatforms": [
+            "emery",
+            "gabbro"
+          ]
+        },
+        {
+          "type": "bitmap",
+          "name": "VERTICAL_COLOR",
+          "file": "images/vertical_color.png",
+          "targetPlatforms": [
+            "basalt",
+            "chalk"
+          ]
+        },
+        {
+          "type": "bitmap",
+          "name": "VERTICAL_COLOR",
+          "file": "images/large/vertical_color.png",
+          "targetPlatforms": [
+            "emery",
+            "gabbro"
+          ]
+        },
+        {
+          "type": "bitmap",
+          "name": "TV_NOISE_BW",
+          "file": "images/tv_noise_bw.png",
+          "targetPlatforms": [
+            "aplite",
+            "basalt",
+            "chalk",
+            "diorite",
+            "flint"
+          ]
+        },
+        {
+          "type": "bitmap",
+          "name": "TV_NOISE_BW",
+          "file": "images/large/tv_noise_bw.png",
+          "targetPlatforms": [
+            "emery",
+            "gabbro"
+          ]
+        },
+        {
+          "type": "bitmap",
+          "name": "TV_NOISE_COLOR",
+          "file": "images/tv_noise_color.png",
+          "targetPlatforms": [
+            "basalt",
+            "chalk"
+          ]
+        },
+        {
+          "type": "bitmap",
+          "name": "TV_NOISE_COLOR",
+          "file": "images/large/tv_noise_color.png",
+          "targetPlatforms": [
+            "emery",
+            "gabbro"
+          ]
+        },
+        {
+          "type": "bitmap",
+          "name": "GRID_BW",
+          "file": "images/grid_bw.png",
+          "targetPlatforms": [
+            "aplite",
+            "basalt",
+            "chalk",
+            "diorite",
+            "flint"
+          ]
+        },
+        {
+          "type": "bitmap",
+          "name": "GRID_BW",
+          "file": "images/large/grid_bw.png",
+          "targetPlatforms": [
+            "emery",
+            "gabbro"
+          ]
+        },
+        {
+          "type": "bitmap",
+          "name": "SUNSET_COLOR",
+          "file": "images/sunset_color.png",
+          "targetPlatforms": [
+            "basalt",
+            "chalk"
+          ]
+        },
+        {
+          "type": "bitmap",
+          "name": "SUNSET_COLOR",
+          "file": "images/large/sunset_color.png",
+          "targetPlatforms": [
+            "emery",
+            "gabbro"
+          ]
+        },
+        {
+          "type": "bitmap",
+          "name": "MENU",
+          "file": "images/menu.png",
+          "menuIcon": true
+        },
+        {
+          "type": "font",
+          "name": "MOLOT_46",
+          "file": "fonts/Molot.otf",
+          "characterRegex": "[0-9:A-Za-z]",
+          "targetPlatforms": [
+            "aplite",
+            "basalt",
+            "chalk",
+            "diorite",
+            "flint"
+          ]
+        },
+        {
+          "type": "font",
+          "name": "MOLOT_52",
+          "file": "fonts/Molot.otf",
+          "characterRegex": "[0-9:A-Za-z]",
+          "targetPlatforms": [
+            "aplite",
+            "basalt",
+            "chalk",
+            "diorite",
+            "flint"
+          ]
+        },
+        {
+          "type": "font",
+          "name": "MOLOT_64",
+          "file": "fonts/Molot.otf",
+          "characterRegex": "[0-9:A-Za-z]",
+          "targetPlatforms": [
+            "emery",
+            "gabbro"
+          ]
+        },
+        {
+          "type": "font",
+          "name": "MOLOT_72",
+          "file": "fonts/Molot.otf",
+          "characterRegex": "[0-9:A-Za-z]",
+          "targetPlatforms": [
+            "emery",
+            "gabbro"
+          ]
         }
-    },
-    "version": "2.3.0"
+      ]
+    }
+  }
 }
